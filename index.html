@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111318">
+<title>PixelKit — Product Image Quality Studio</title>
+<!-- JSZip for clean bulk zip downloads -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--bg:#0d0f13;--panel:#151922;--panel2:#1b202b;--line:#2a3140;--text:#f4f6fb;--muted:#9ba5b5;--accent:#a78bfa;--accent2:#7c5ce7;--green:#45d49a;--yellow:#f4c76b;--red:#ff7777;--radius:18px}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% -10%,#292044 0,transparent 36%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
+.shell{max-width:1240px;margin:auto;padding:24px 22px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#c4b5fd,#7656db);display:grid;place-items:center;color:#171221;font-size:21px;font-weight:900;box-shadow:0 8px 30px #8b5cf633}.brandname{font-size:19px;font-weight:800;letter-spacing:-.5px}.brandname span{color:var(--accent)}.tagline{font-size:11px;color:var(--muted);margin-top:1px}.topright{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}.local{border:1px solid var(--line);padding:7px 10px;border-radius:99px;background:#151922}
+.hero{margin-bottom:22px}.eyebrow{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}.hero h1{font-size:clamp(27px,4vw,42px);line-height:1.08;letter-spacing:-1.5px;margin:9px 0}.hero p{color:var(--muted);max-width:700px;margin:0;font-size:14px}
+.toolbar{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;margin:24px 0}.control,.card{background:linear-gradient(180deg,#191e28,#141821);border:1px solid var(--line);border-radius:var(--radius)}.control{padding:14px 15px}.control label,.label{display:block;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.55px;text-transform:uppercase;margin-bottom:8px}.control select,.control input{width:100%;background:#10141b;color:var(--text);border:1px solid #343c4c;border-radius:10px;padding:11px 12px;outline:none}.hint{font-size:11px;color:var(--muted);margin-top:7px}
+.upload{border:1.5px dashed #555071;background:linear-gradient(135deg,#1c1a2b,#151923);border-radius:20px;padding:26px 18px;text-align:center;transition:.2s;cursor:pointer}.upload.drag{border-color:var(--accent);background:#211c34}.uploadicon{width:48px;height:48px;border-radius:15px;background:#2b2440;color:#c4b5fd;display:grid;place-items:center;margin:0 auto 10px;font-size:23px}.upload strong{font-size:15px}.upload p{color:var(--muted);font-size:12px;margin:5px 0 14px}.btn{border:0;border-radius:11px;padding:10px 15px;font-weight:750;background:linear-gradient(135deg,#c4b5fd,#9477f3);color:#171221;box-shadow:0 5px 18px #8b5cf622}.btn.secondary{background:#242a37;color:#e7eaf2;border:1px solid #394153;box-shadow:none}.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);box-shadow:none}.btn.small{font-size:12px;padding:8px 11px}.upload .sub{font-size:11px;color:#798395;margin-top:12px}
+.notice{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid #51452d;background:#282216;border-radius:13px;color:#d9c79e;font-size:12px;margin:16px 0 20px}.notice b{color:#f6dda3}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 12px}.sectionhead h2{font-size:17px;margin:0;letter-spacing:-.3px}.sectionhead span{font-size:11px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}.stat{padding:13px 14px;border:1px solid var(--line);background:#151922;border-radius:14px}.stat .n{font-size:23px;font-weight:800;letter-spacing:-.8px}.stat .t{font-size:11px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.item{padding:14px;min-width:0}.itemtop{display:flex;gap:12px;align-items:center}.thumb{width:76px;height:76px;flex:none;border-radius:12px;background:#0d1016;border:1px solid var(--line);object-fit:contain}.filemeta{min-width:0;flex:1}.filename{font-weight:750;overflow-wrap:anywhere;font-size:13px}.dim{font-size:11px;color:var(--muted);margin-top:3px}.score{font-size:20px;font-weight:850;white-space:nowrap}.score small{display:block;text-align:right;font-size:9px;color:var(--muted);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:99px;font-size:10px;font-weight:800;border:1px solid transparent}.pass{color:var(--green);background:#123127;border-color:#235542}.warn{color:var(--yellow);background:#332a17;border-color:#66502a}.fail{color:var(--red);background:#351d22;border-color:#66323b}.neutral{color:#c4b5fd;background:#29233c;border-color:#4a3b70}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:13px 0}.check{background:#10141b;border:1px solid #252c38;border-radius:10px;padding:8px 9px;min-width:0}.check .ct{font-size:10px;color:var(--muted)}.check .cv{font-size:11px;font-weight:750;margin-top:2px;overflow-wrap:anywhere}
+.issues{font-size:11px;color:#c1c8d4;margin:8px 0 12px;padding-left:17px}.issues li{margin:4px 0}.itemactions{display:flex;flex-wrap:wrap;gap:7px}.itemactions .btn{flex:1}
+.empty{padding:30px 15px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}.empty b{display:block;color:var(--text);margin-bottom:4px}
+.settings{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.setting{background:#10141b;border:1px solid var(--line);border-radius:13px;padding:13px}.setting label{display:flex;justify-content:space-between;gap:10px;color:#cbd2df;font-size:12px;font-weight:650}.setting input[type=range]{width:100%;accent-color:#a78bfa;margin-top:12px}.setting select,.setting input[type=text]{width:100%;margin-top:8px;background:#171d27;border:1px solid #343c4c;color:var(--text);border-radius:8px;padding:8px}
+.preset-bar{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.preset-bar select, .preset-bar input, .preset-bar button {flex: 1 1 100%;}
+.footer{border-top:1px solid var(--line);margin-top:34px;padding-top:17px;color:#788394;font-size:11px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.hidden{display:none!important}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#f4f0ff;color:#211a35;padding:11px 16px;border-radius:12px;font-weight:750;box-shadow:0 10px 35px #0008;z-index:10;max-width:90%;font-size:12px}
+@media(min-width:760px){
+  .preset-bar select {flex: 1.2;}
+  .preset-bar input {flex: 1.5;}
+  .preset-bar button {flex: 0 0 auto;}
+}
+@media(max-width:760px){.shell{padding:17px 13px 45px}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.topright .local{display:none}.hero h1{font-size:31px}.settings{grid-template-columns:1fr}.sectionhead{align-items:flex-start}.itemactions .btn{flex:1 1 40%}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="brand"><div class="logo">P</div><div><div class="brandname">Pixel<span>Kit</span></div><div class="tagline">PRODUCT IMAGE QUALITY STUDIO</div></div></div>
+    <div class="topright"><span class="local">● Runs locally in your browser</span><button class="btn ghost small" id="clearBtn">Clear workspace</button></div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Catalog image quality assurance</div>
+    <h1>Better product images.<br><span style="color:#b9a5ff">Fewer listing surprises.</span></h1>
+    <p>Check image dimensions, format, background, sharpness and composition. Fix common issues, recheck, and export a cleaner product image.</p>
+  </section>
+
+  <section class="toolbar">
+    <div class="control">
+      <label for="marketplace">Quality profile</label>
+      <select id="marketplace">
+        <option value="strict_white">Strict Profile (1,001px + Pure White)</option>
+        <option value="standard_square">Standard Square Profile (800px+)</option>
+        <option value="flexible_catalog">Flexible Catalog Profile (800px+)</option>
+        <option value="general">General Product Quality</option>
+      </select>
+      <div class="hint" id="profileHint">Strict profile includes a 1,001 px longest-edge check and white-background requirement.</div>
+    </div>
+    <div class="control">
+      <label for="targetSize">Export canvas</label>
+      <select id="targetSize">
+        <option value="1200">1200 × 1200 px (Square)</option>
+        <option value="1600" selected>1600 × 1600 px (Square)</option>
+        <option value="2000">2000 × 2000 px (Square)</option>
+        <option value="custom">Keep original dimensions</option>
+      </select>
+      <div class="hint">Square canvas aspect ratio padding keeps image centered without stretching.</div>
+    </div>
+    <div class="control">
+      <label for="outputFormat">Export format</label>
+      <select id="outputFormat">
+        <option value="image/jpeg" selected>JPEG</option>
+        <option value="image/png">PNG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+      <div class="hint">JPEG/WebP are compressed. PNG is lossless but can be larger.</div>
+    </div>
+  </section>
+
+  <!-- Custom Presets Section -->
+  <section class="card" style="padding:14px 16px; margin-bottom:20px;">
+    <div class="label" style="margin-bottom:6px;">Custom Saved Profiles (Local Storage)</div>
+    <div class="preset-bar">
+      <select id="savedPresets" style="background:#10141b;color:var(--text);border:1px solid #343c4c;border-radius:8px;padding:8px;">
+        <option value="">— Select a saved custom profile —</option>
+      </select>
+      <input type="text" id="presetNameInput" placeholder="New preset name (e.g. My Shopify Store)" style="background:#10141b;color:var(--text);border:1px solid #343c4c;border-radius:8px;padding:8px;">
+      <button class="btn small" id="savePresetBtn" type="button">Save Setup</button>
+      <button class="btn secondary small" id="deletePresetBtn" type="button">Delete</button>
+    </div>
+  </section>
+
+  <section class="upload" id="dropzone" tabindex="0" role="button" aria-label="Upload product images">
+    <div class="uploadicon">↥</div>
+    <strong>Drop product images here</strong>
+    <p>or choose files from your device</p>
+    <button class="btn" id="browseBtn" type="button">Choose images</button>
+    <div class="sub">JPG · PNG · WebP · Multiple files supported · Processing stays on this device</div>
+    <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden">
+  </section>
+
+  <div class="notice"><span>ⓘ</span><div><b>Important Notice:</b> PixelKit is an independent utility tool. All profile names and criteria are used solely for descriptive technical reference and do not imply affiliation with any third-party platform or marketplace. Verify individual target guidelines independently.</div></div>
+
+  <div id="workspace" class="hidden">
+    <div class="sectionhead"><h2>Quality overview</h2><span id="fileCount">0 images</span></div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="statTotal">0</div><div class="t">Images checked</div></div>
+      <div class="stat"><div class="n" id="statReady">0</div><div class="t">No critical flags</div></div>
+      <div class="stat"><div class="n" id="statAttention">0</div><div class="t">Need attention</div></div>
+      <div class="stat"><div class="n" id="statAvg">—</div><div class="t">Average quality score*</div></div>
+    </div>
+    <div class="sectionhead"><h2>Image diagnostics</h2><span>Rechecks run automatically after profile changes</span></div>
+    <div class="grid" id="imageGrid"></div>
+    <div class="sectionhead"><h2>Export settings</h2><span>Applied when you export</span></div>
+    <div class="settings">
+      <div class="setting"><label for="quality">Compression quality <b id="qualityValue">90%</b></label><input id="quality" type="range" min="60" max="100" value="90"></div>
+      <div class="setting"><label for="background">Canvas background</label><select id="background"><option value="white">White</option><option value="original">Transparent (PNG only)</option><option value="black">Black</option></select></div>
+      <div class="setting"><label for="autoClean">Auto Pure-White & Smart Clean</label><select id="autoClean"><option value="yes" selected>Clean off-white & shadows to #FFF</option><option value="no">Keep raw background</option></select></div>
+    </div>
+    <div class="itemactions" style="margin-top:14px">
+      <button class="btn" id="exportAllZip">Download all as ZIP archive</button>
+      <button class="btn secondary" id="reportBtn">Download quality report (CSV)</button>
+    </div>
+    <p class="hint">*The score is a heuristic indicator based on available automated checks. It is not an official approval rating.</p>
+  </div>
+
+  <div id="emptyState" class="empty" style="margin-top:16px"><b>Your workspace is ready</b>Upload one or more product images to run the first quality check.</div>
+
+  <footer class="footer"><span>PixelKit MVP · Browser-based image processing</span><span>Images are processed locally; nothing is uploaded to a server.</span></footer>
+</div>
+<div id="toast" class="toast hidden" role="status"></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const state = {items:[], nextId:1};
+  const profiles = {
+    strict_white: {name:"Strict Profile", minLongest:1001, white:true, hint:"Strict checks: longest edge ≥ 1,001 px and near-pure-white background."},
+    standard_square: {name:"Standard Square Profile", minLongest:800, white:false, hint:"Standard technical checks for square catalog listings."},
+    flexible_catalog: {name:"Flexible Catalog Profile", minLongest:800, white:false, hint:"Relaxed technical checks for flexible catalog formatting."},
+    general: {name:"General Quality", minLongest:800, white:false, hint:"General product-image quality checks."}
+  };
+  const fmtBytes = n => n < 1024*1024 ? (n/1024).toFixed(0)+" KB" : (n/1024/1024).toFixed(2)+" MB";
+  const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  
+  function toast(msg){
+    $("toast").textContent=msg;
+    $("toast").classList.remove("hidden");
+    clearTimeout(toast.t);
+    toast.t=setTimeout(()=>$("toast").classList.add("hidden"),2600);
+  }
+  
+  function loadImage(file){
+    return new Promise((resolve,reject)=>{
+      const url=URL.createObjectURL(file),img=new Image();
+      img.onload=()=>resolve({img,url});
+      img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Could not read image"));};
+      img.src=url;
+    });
+  }
+  
+  function canvasFor(w,h){const c=document.createElement("canvas");c.width=w;c.height=h;return c;}
+
+  function analyze(img,file){
+    const w=img.naturalWidth,h=img.naturalHeight,longest=Math.max(w,h);
+    const sample=canvasFor(Math.min(w,420),Math.min(h,420)),ctx=sample.getContext("2d",{willReadFrequently:true});
+    ctx.drawImage(img,0,0,sample.width,sample.height);
+    const sw=sample.width,sh=sample.height,data=ctx.getImageData(0,0,sw,sh).data;
+    const corners=[[0,0],[sw-1,0],[0,sh-1],[sw-1,sh-1]].map(([x,y])=>{let i=(y*sw+x)*4;return [data[i],data[i+1],data[i+2]];});
+    const bg=[0,1,2].map(k=>Math.round(corners.reduce((a,c)=>a+c[k],0)/4));
+    let whiteCount=0,opaque=0,edgePixels=0,minX=sw,minY=sh,maxX=0,maxY=0;
+    const step=Math.max(1,Math.floor(Math.min(sw,sh)/240));
+
+    for(let y=0;y<sh;y+=step)for(let x=0;x<sw;x+=step){
+      const i=(y*sw+x)*4,r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+      if(a>240){opaque++;if(r>242&&g>242&&b>242)whiteCount++;}
+      const d=Math.abs(r-bg[0])+Math.abs(g-bg[1])+Math.abs(b-bg[2]);
+      if(a>30&&d>65){
+        edgePixels++;
+        minX=Math.min(minX,x);minY=Math.min(minY,y);
+        maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
+      }
+    }
+
+    const whiteRatio=opaque?whiteCount/opaque:0;
+    const occupancy=(edgePixels>12&&maxX>minX&&maxY>minY)?((maxX-minX)*(maxY-minY))/(sw*sh):null;
+    
+    const gray=new Float32Array(sw*sh);
+    for(let y=0;y<sh;y++)for(let x=0;x<sw;x++){let i=(y*sw+x)*4;gray[y*sw+x]=.299*data[i]+.587*data[i+1]+.114*data[i+2];}
+    let sum=0,sum2=0,n=0;
+    for(let y=1;y<sh-1;y+=step)for(let x=1;x<sw-1;x+=step){
+      let i=y*sw+x;
+      let lap=gray[i-1]+gray[i+1]+gray[i-sw]+gray[i+sw]-4*gray[i];
+      sum+=lap;sum2+=lap*lap;n++;
+    }
+    const variance=n?sum2/n-(sum/n)**2:0;
+    const checks=[],issues=[];
+    const profileKey = $("marketplace").value;
+    const p=profiles[profileKey] || {minLongest:800, white:false};
+    const dimOK=longest>=p.minLongest;
+    const dimDetail= profileKey==="strict_white" ? (dimOK?"Meets strict longest-edge check":"Below strict 1,001 px longest-edge check") : (dimOK?"Meets PixelKit working guideline":"Below PixelKit 800 px working guideline");
+    
+    checks.push({name:"Resolution",value:`${w} × ${h} px`,status:dimOK?"pass":"fail",detail:dimDetail});
+    const formatOK=["image/jpeg","image/png","image/webp"].includes(file.type);
+    checks.push({name:"File format",value:(file.type.split("/")[1]||"Unknown").toUpperCase(),status:formatOK?"pass":"warn",detail:formatOK?"Supported format":"Unsupported format"});
+    const sizeOK=file.size<=10*1024*1024;
+    checks.push({name:"File size",value:fmtBytes(file.size),status:sizeOK?"pass":"warn",detail:sizeOK?"Within 10 MB working guideline":"Large file; consider compression"});
+    
+    let bgStatus="review",bgDetail=`${Math.round(whiteRatio*100)}% near-white pixels`;
+    if(p.white){
+      bgStatus=whiteRatio>.92?"pass":whiteRatio>.65?"review":"fail";
+      bgDetail=bgStatus==="pass"?"Mostly white background":bgStatus==="review"?"Background may need inspection":"Background is not predominantly white";
+    } else {
+      bgStatus=whiteRatio>.92?"pass":"review";
+      bgDetail=bgStatus==="pass"?"Mostly white background":"Background appearance should be reviewed";
+    }
+    checks.push({name:"Background",value:bgStatus==="pass"?"Looks clean":bgStatus==="fail"?"Needs correction":"Visual review",status:bgStatus,detail:bgDetail});
+    
+    const sharpStatus=variance<35?"review":"pass";
+    checks.push({name:"Sharpness",value:sharpStatus==="review"?"Possible blur":"No blur flag",status:sharpStatus,detail:sharpStatus==="review"?"Low edge detail; inspect closely":"No obvious low-detail signal"});
+    
+    const occStatus=occupancy===null?"review":occupancy<.12?"review":"pass";
+    checks.push({name:"Composition",value:occupancy===null?"Unable to estimate":`${Math.round(occupancy*100)}% bbox`,status:occStatus,detail:"Bounding-box estimate only; manually confirm framing"});
+
+    if(!dimOK)issues.push(`Increase the longest edge to at least ${p.minLongest} px.`);
+    if(p.white&&bgStatus!=="pass")issues.push("Inspect background; strict profiles require near-pure white background.");
+    if(bgStatus==="review"&&!p.white)issues.push("Review background visually.");
+    if(sharpStatus==="review")issues.push("Inspect image at 100% zoom for blur.");
+    if(occupancy===null||occStatus==="review")issues.push("Check that product is fully visible and centered.");
+    if(!sizeOK)issues.push("Compress or resize image to reduce file size.");
+
+    const fail=checks.filter(c=>c.status==="fail").length,warn=checks.filter(c=>c.status==="warn"||c.status==="review").length;
+    const score=Math.max(0,100-fail*22-warn*8);
+    return {w,h,ratio:w/h,whiteRatio,variance,occupancy,checks,issues,score,profile:p.name||"Custom Profile"};
+  }
+
+  function statusPill(s){return `<span class="pill ${s==="pass"?"pass":s==="fail"?"fail":s==="warn"||s==="review"?"warn":"neutral"}">${s==="pass"?"✓ Pass":s==="fail"?"✕ Fail":s==="warn"?"! Warning":"! Review"}</span>`;}
+
+  function addFiles(files){
+    const accepted=[...files].filter(f=>/^image\/(jpeg|png|webp)$/.test(f.type));
+    if(!accepted.length){toast("Choose JPG, PNG or WebP images.");return;}
+    accepted.forEach(async file=>{
+      try{
+        const {img,url}=await loadImage(file);
+        const item={id:state.nextId++,file,img,url,name:file.name,analysis:null};
+        item.analysis=analyze(img,file);
+        state.items.push(item);
+        render();
+      }catch(e){toast(`Could not load ${file.name}`);}
+    });
+  }
+
+  function render(){
+    $("workspace").classList.toggle("hidden",!state.items.length);
+    $("emptyState").classList.toggle("hidden",!!state.items.length);
+    $("fileCount").textContent=`${state.items.length} image${state.items.length===1?"":"s"}`;
+    const ready=state.items.filter(i=>!i.analysis.checks.some(c=>c.status==="fail")).length;
+    const attention=state.items.length-ready;
+    $("statTotal").textContent=state.items.length;
+    $("statReady").textContent=ready;
+    $("statAttention").textContent=attention;
+    $("statAvg").textContent=state.items.length?Math.round(state.items.reduce((a,i)=>a+i.analysis.score,0)/state.items.length):"—";
+
+    $("imageGrid").innerHTML=state.items.map(item=>{
+      const a=item.analysis,problem=a.issues.length;
+      return `<article class="card item" data-id="${item.id}">
+        <div class="itemtop"><img class="thumb" src="${item.url}" alt=""><div class="filemeta"><div class="filename">${esc(item.name)}</div><div class="dim">${a.w} × ${a.h} px · ${fmtBytes(item.file.size)}</div><div style="margin-top:7px">${problem?'<span class="pill warn">Review recommended</span>':'<span class="pill pass">No critical flags</span>'}</div></div><div class="score">${a.score}<small>QUALITY*</small></div></div>
+        <div class="checks">${a.checks.map(c=>`<div class="check"><div class="ct">${esc(c.name)}</div><div class="cv">${statusPill(c.status)} <span style="margin-left:4px">${esc(c.value)}</span></div></div>`).join("")}</div>
+        ${problem?`<ul class="issues">${a.issues.slice(0,4).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:'<div class="hint">No critical automated flags. Always review final image manually.</div>'}
+        <div class="itemactions"><button class="btn small" data-action="fix" data-id="${item.id}">Optimize & export</button><button class="btn secondary small" data-action="remove" data-id="${item.id}">Remove</button></div>
+      </article>`;
+    }).join("");
+  }
+
+  async function makeOutput(item){
+    const fmt=$("outputFormat").value,quality=Number($("quality").value)/100,bg=$("background").value;
+    const isCustom=$("targetSize").value==="custom";
+    
+    let canvasW, canvasH, renderW, renderH, offsetX, offsetY;
+    
+    if(isCustom){
+      canvasW = item.analysis.w;
+      canvasH = item.analysis.h;
+      renderW = canvasW;
+      renderH = canvasH;
+      offsetX = 0;
+      offsetY = 0;
+    } else {
+      const targetDim = Number($("targetSize").value);
+      canvasW = targetDim;
+      canvasH = targetDim;
+      const scale = Math.min(canvasW / item.analysis.w, canvasH / item.analysis.h);
+      renderW = Math.round(item.analysis.w * scale);
+      renderH = Math.round(item.analysis.h * scale);
+      offsetX = Math.round((canvasW - renderW) / 2);
+      offsetY = Math.round((canvasH - renderH) / 2);
+    }
+
+    const canvas=canvasFor(canvasW,canvasH),ctx=canvas.getContext("2d");
+
+    if(fmt!=="image/png"||bg!=="original"){
+      ctx.fillStyle=bg==="black"?"#000":"#fff";
+      ctx.fillRect(0,0,canvasW,canvasH);
+    }
+    
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality="high";
+    ctx.drawImage(item.img, offsetX, offsetY, renderW, renderH);
+
+    if($("autoClean").value==="yes" && bg==="white" && fmt!=="image/png"){
+      const imgData = ctx.getImageData(0, 0, canvasW, canvasH);
+      const d = imgData.data;
+      for(let i = 0; i < d.length; i += 4) {
+        if(d[i] > 230 && d[i+1] > 230 && d[i+2] > 230) {
+          d[i] = 255; d[i+1] = 255; d[i+2] = 255;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,fmt,quality));
+    if(!blob)throw new Error("Export failed");
+    return blob;
+  }
+
+  function downloadBlob(blob,name){
+    const u=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=u;a.download=name;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),5000);
+  }
+
+  function outputName(item){
+    const ext=$("outputFormat").value.split("/")[1].replace("jpeg","jpg");
+    return item.name.replace(/\.[^.]+$/,"")+"_pixelkit."+ext;
+  }
+
+  async function exportItem(item){
+    try{
+      const blob=await makeOutput(item);
+      downloadBlob(blob,outputName(item));
+      toast(`Exported ${item.name}`);
+    }catch(e){toast(e.message||"Export failed");}
+  }
+
+  async function exportAllAsZip(){
+    if(!state.items.length) return;
+    toast("Generating ZIP archive, please wait…");
+    try {
+      const zip = new JSZip();
+      for(const item of state.items){
+        const blob = await makeOutput(item);
+        zip.file(outputName(item), blob);
+      }
+      const content = await zip.generateAsync({type:"blob"});
+      downloadBlob(content, "pixelkit-optimized-catalog.zip");
+      toast("ZIP archive downloaded successfully!");
+    } catch(err) {
+      toast("Could not generate ZIP archive.");
+    }
+  }
+
+  function loadSavedPresets(){
+    const stored = localStorage.getItem("pixelkit_presets");
+    const presets = stored ? JSON.parse(stored) : {};
+    const select = $("savedPresets");
+    select.innerHTML = '<option value="">— Select a saved custom profile —</option>';
+    Object.keys(presets).forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+  }
+
+  $("savePresetBtn").addEventListener("click", () => {
+    const name = $("presetNameInput").value.trim();
+    if(!name){ toast("Enter a valid preset name."); return; }
+    const stored = localStorage.getItem("pixelkit_presets");
+    const presets = stored ? JSON.parse(stored) : {};
+    
+    presets[name] = {
+      marketplace: $("marketplace").value,
+      targetSize: $("targetSize").value,
+      outputFormat: $("outputFormat").value,
+      quality: $("quality").value,
+      background: $("background").value,
+      autoClean: $("autoClean").value
+    };
+    
+    localStorage.setItem("pixelkit_presets", JSON.stringify(presets));
+    $("presetNameInput").value = "";
+    loadSavedPresets();
+    toast(`Preset "${name}" saved successfully!`);
+  });
+
+  $("savedPresets").addEventListener("change", (e) => {
+    const name = e.target.value;
+    if(!name) return;
+    const stored = localStorage.getItem("pixelkit_presets");
+    if(!stored) return;
+    const presets = JSON.parse(stored);
+    const p = presets[name];
+    if(!p) return;
+
+    $("marketplace").value = p.marketplace;
+    $("targetSize").value = p.targetSize;
+    $("outputFormat").value = p.outputFormat;
+    $("quality").value = p.quality;
+    $("qualityValue").textContent = p.quality + "%";
+    $("background").value = p.background;
+    $("autoClean").value = p.autoClean;
+
+    if(profiles[p.marketplace]) {
+      $("profileHint").textContent = profiles[p.marketplace].hint;
+    } else {
+      $("profileHint").textContent = `Custom profile: ${name}`;
+    }
+
+    if(state.items.length){
+      state.items.forEach(i=>i.analysis=analyze(i.img,i.file));
+      render();
+    }
+    toast(`Loaded preset "${name}"`);
+  });
+
+  $("deletePresetBtn").addEventListener("click", () => {
+    const name = $("savedPresets").value;
+    if(!name){ toast("Select a preset to delete."); return; }
+    const stored = localStorage.getItem("pixelkit_presets");
+    if(!stored) return;
+    const presets = JSON.parse(stored);
+    delete presets[name];
+    localStorage.setItem("pixelkit_presets", JSON.stringify(presets));
+    loadSavedPresets();
+    toast(`Deleted preset "${name}"`);
+  });
+
+  $("browseBtn").addEventListener("click",e=>{ e.stopPropagation(); $("fileInput").click(); });
+  $("dropzone").addEventListener("click",e=>{ if(e.target.id!=="browseBtn") $("fileInput").click(); });
+  $("dropzone").addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" ") $("fileInput").click(); });
+  $("fileInput").addEventListener("change",e=>{ addFiles(e.target.files); $("fileInput").value=""; });
+
+  ["dragenter","dragover"].forEach(ev=>$("dropzone").addEventListener(ev,e=>{e.preventDefault();$("dropzone").classList.add("drag");}));
+  ["dragleave","drop"].forEach(ev=>$("dropzone").addEventListener(ev,e=>{e.preventDefault();$("dropzone").classList.remove("drag");}));
+  $("dropzone").addEventListener("drop",e=>addFiles(e.dataTransfer.files));
+
+  $("marketplace").addEventListener("change",()=>{
+    const p=profiles[$("marketplace")?.value];
+    if(p) $("profileHint").textContent=p.hint;
+    state.items.forEach(i=>i.analysis=analyze(i.img,i.file));
+    render();
+  });
+  
+  $("quality").addEventListener("input",()=> $("qualityValue").textContent=$("quality").value+"%");
+
+  $("imageGrid").addEventListener("click",e=>{
+    const b=e.target.closest("button[data-action]");if(!b)return;
+    const item=state.items.find(i=>i.id===Number(b.dataset.id));if(!item)return;
+    if(b.dataset.action==="fix")exportItem(item);
+    if(b.dataset.action==="remove"){
+      URL.revokeObjectURL(item.url);
+      state.items=state.items.filter(i=>i.id!==item.id);
+      render();
+    }
+  });
+
+  $("exportAllZip").addEventListener("click", exportAllAsZip);
+
+  $("reportBtn").addEventListener("click",()=>{
+    const rows=[["Filename","Quality profile","Width","Height","File size bytes","Quality score","Check","Status","Result"]];
+    state.items.forEach(i=>i.analysis.checks.forEach(c=>rows.push([i.name,i.analysis.profile,i.analysis.w,i.analysis.h,i.file.size,i.analysis.score,c.name,c.status,c.value])));
+    const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+    downloadBlob(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),"pixelkit-quality-report.csv");
+  });
+
+  $("clearBtn").addEventListener("click",()=>{
+    state.items.forEach(i=>URL.revokeObjectURL(i.url));
+    state.items=[];
+    render();
+  });
+
+  loadSavedPresets();
+})();
+</script>
+</body>
+</html>
